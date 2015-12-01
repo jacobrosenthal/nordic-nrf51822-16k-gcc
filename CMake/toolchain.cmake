@@ -55,6 +55,7 @@ set(NRF51822_SOFTDEVICE_HEX_FILE    "${NRF51822_SOFTDEVICE_FILE_PATH}")
 set(NRF51822_MERGE_HEX_SCRIPT       "${CMAKE_CURRENT_LIST_DIR}/../scripts/merge_hex.py")
 set(NRF51822_GEN_DAT_SCRIPT         "${CMAKE_CURRENT_LIST_DIR}/../scripts/generate_dat.py")
 set(NRF51822_BOOTLOADER_HEX_FILE    "${CMAKE_CURRENT_LIST_DIR}/../../../yotta_modules/ble-nrf51822/bootloader/s130_nrf51_1.0.0_bootloader.hex")
+set(NRF51822_REPLACE_HEX_FILE       "${CMAKE_CURRENT_LIST_DIR}/../softdevice/replace.hex")
 set(NRF51822_MEMORY_INFO_SCRIPT     "${CMAKE_CURRENT_LIST_DIR}/../scripts/memory_info.py")
 set(NRF51822_HEAP_WARNING_THRESHOLD 1024)
 
@@ -75,7 +76,7 @@ function(yotta_apply_target_rules target_type target_name)
             # generate dfu .dat from bin
             COMMAND python ${NRF51822_GEN_DAT_SCRIPT} ${target_name}.bin
             COMMENT "generating .dat"
-            COMMAND srec_cat ${NRF51822_SOFTDEVICE_HEX_FILE} -intel ${target_name}.hex -intel ${NRF51822_BOOTLOADER_HEX_FILE} -intel -exclude 0x3FC00 0x3FC20 -generate 0x3FC00 0x3FC04 -l-e-constant 0x01 4 -generate 0x3FC04 0x3FC08 -l-e-constant 0x00 4 -generate 0x3FC08 0x3FC0C -l-e-constant 0xFE 4 -generate 0x3FC0C 0x3FC20 -constant 0x00 -o ${target_name}-combined-bootloader.hex -intel
+            COMMAND python ${NRF51822_MERGE_HEX_SCRIPT} ${NRF51822_BOOTLOADER_HEX_FILE} ${target_name}-combined.hex ${target_name}-combined-bootloader.hex --replace ${NRF51822_REPLACE_HEX_FILE}
             COMMENT "building fota ${target_name}-combined-bootloader.hex"
             VERBATIM
         )

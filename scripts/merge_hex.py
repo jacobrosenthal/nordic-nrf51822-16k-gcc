@@ -18,7 +18,7 @@
    USAGE: merge_hex.py input_file1 input_file2 output_file.
 """
 
-import sys
+import sys, argparse
 
 fail_color = ''
 
@@ -55,19 +55,28 @@ def main(arguments):
     except:
         return fail('error: You do not have \'intelhex\' installed. Please run \'pip install intelhex\' then retry.')
 
-    # Ensure the right number of arguments are supplied
-    if not len(arguments) == 3:
-        return fail('error: Improper use of merge_hex.py.\nUSAGE: merge_hex.py input_file1 input_file2 output_file.')
+    parser = argparse.ArgumentParser()
+    parser.add_argument('input_file1')
+    parser.add_argument('input_file2')
+    parser.add_argument('output_file')
+    parser.add_argument('--replace')
+
+    args = parser.parse_args()
 
     # Get the two hex files, merge them, and save the result
-    orig = IntelHex(arguments[0])
+    orig = IntelHex(args.input_file1)
     convert_start_addr(orig)    
 
-    new = IntelHex(arguments[1])
+    new = IntelHex(args.input_file2)
     convert_start_addr(new)
     
     orig.merge(new, overlap='replace')
-    orig.write_hex_file(arguments[2])
+
+    if args.replace:
+        replace = IntelHex(args.input_file2)
+        orig.merge(replace, overlap='replace')
+
+    orig.write_hex_file(args.output_file)
 
 if __name__ == '__main__':
     sys.exit(main(sys.argv[1:]))
